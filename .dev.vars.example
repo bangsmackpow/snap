@@ -1,0 +1,8 @@
+# Local dev secrets — copy to .dev.vars. NEVER commit .dev.vars.
+# In production these come from `wrangler secret put <NAME>`.
+AUTH_SECRET=change-me-at-least-32-random-chars
+DATA_KEY_SECRET=change-me-at-least-32-random-chars
+VISION_API_KEY=
+ENROLL_KEY=
+COOKIE_SECURE=false
+ALLOWED_ORIGINS=

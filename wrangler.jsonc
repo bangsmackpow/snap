@@ -1,0 +1,31 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "snap",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-01",
+  "observability": {
+    "enabled": true
+  },
+  "assets": {
+    "directory": "public"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "snap-db",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "drizzle"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "BUCKET",
+      "bucket_name": "snap-bucket"
+    }
+  ],
+  "vars": {
+    "AUTH_TOKEN_TTL_DAYS": "365",
+    "MAGIC_LINK_TTL_MINUTES": "15",
+    "VISION_MODEL": "gemini-2.0-flash"
+  }
+}

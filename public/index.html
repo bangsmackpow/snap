@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#1a5c38" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+  <link rel="apple-touch-icon" href="/icon.svg" />
+  <title>Snap Ledger</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">🧾</span>
+      <h1>Snap Ledger</h1>
+    </div>
+    <div class="header-actions">
+      <button id="export-open-btn" class="header-btn" type="button" hidden>Export</button>
+      <span id="auth-badge" class="badge" hidden></span>
+    </div>
+  </header>
+
+  <main>
+    <section id="enroll-screen" class="panel" hidden>
+      <h2>Welcome</h2>
+      <p>This device isn't enrolled yet. Enroll once to save photos to your ledger.</p>
+      <input id="enroll-key" class="text-input" type="password" autocomplete="off" placeholder="Enroll code (only if you set one)" />
+      <button id="enroll-btn" class="big-btn">Enroll this device</button>
+    </section>
+
+    <section id="capture-screen" class="panel" hidden>
+      <div class="mode-toggle" role="group" aria-label="Capture mode">
+        <button id="mode-quick" class="mode-btn active">Quick Snap</button>
+        <button id="mode-pair" class="mode-btn">Pair Recent</button>
+      </div>
+      <p id="capture-hint" class="hint">Snap a photo of a check or invoice</p>
+      <button id="capture-btn" class="big-btn capture-btn" type="button">Snap Photo</button>
+      <input id="file-input" type="file" accept="image/*" capture="environment" hidden />
+      <p id="status-line" class="status-line"></p>
+    </section>
+
+    <section id="result-card" class="panel" hidden></section>
+
+    <section id="recent" class="panel">
+      <h2>Recent</h2>
+      <ul id="recent-list" class="recent-list"></ul>
+    </section>
+  </main>
+
+  <dialog id="export-dialog" class="export-dialog">
+    <form method="dialog">
+      <h2>Download Accountant Package</h2>
+      <p class="hint">Choose a period, then download the .iif + .csv + image bundle.</p>
+      <fieldset class="range-group" id="export-range">
+        <label><input type="radio" name="range" value="month" checked /> This Month</label>
+        <label><input type="radio" name="range" value="quarter" /> Last Quarter</label>
+        <label><input type="radio" name="range" value="ytd" /> Year to Date</label>
+      </fieldset>
+      <div class="card-actions">
+        <button id="export-download-btn" class="big-btn amber" type="button">Download Accountant Package</button>
+        <button class="big-btn ghost" value="cancel">Cancel</button>
+      </div>
+      <p id="export-status" class="status-line"></p>
+    </form>
+  </dialog>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

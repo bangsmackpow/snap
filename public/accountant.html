@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Snap Ledger — Accountant Portal</title>
+  <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+  <link rel="stylesheet" href="/accountant.css" />
+</head>
+<body>
+  <div id="auth-screen" class="auth-screen" hidden>
+    <div class="auth-card">
+      <h1>🧾 Snap Ledger</h1>
+      <p>Signing you in with your secure link…</p>
+      <p id="auth-msg" class="auth-msg"></p>
+      <button id="auth-retry" class="btn primary" hidden>Retry</button>
+    </div>
+  </div>
+
+  <div id="portal" hidden>
+    <header class="topbar">
+      <div class="topbar-title">Snap Ledger — Accountant Portal</div>
+      <div class="topbar-actions">
+        <select id="queue-filter" class="select">
+          <option value="open">Open / Unverified</option>
+          <option value="flagged">Flagged</option>
+          <option value="verified">Verified</option>
+        </select>
+        <button id="export-btn" class="btn amber">Export Package</button>
+        <button id="rules-btn" class="btn ghost">Category Rules</button>
+        <button id="audit-btn" class="btn ghost">Audit Log</button>
+        <button id="logout-btn" class="btn ghost">Logout</button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <!-- Left: queue list -->
+      <aside class="queue-pane">
+        <h2>Review Queue <span id="queue-count" class="count"></span></h2>
+        <ul id="queue-list" class="queue-list"></ul>
+      </aside>
+
+      <!-- Center: image viewers -->
+      <section class="viewer-pane">
+        <div class="viewer-head">
+          <h2>Documents</h2>
+          <div class="viewer-controls">
+            <button class="btn icon" id="zoom-out" title="Zoom out">−</button>
+            <button class="btn icon" id="zoom-in" title="Zoom in">+</button>
+            <button class="btn icon" id="rotate-btn" title="Rotate">↻</button>
+            <button class="btn icon" id="reset-view" title="Reset view">⟲</button>
+          </div>
+        </div>
+        <div class="image-pair">
+          <div class="image-slot">
+            <div class="slot-label">Check</div>
+            <div class="image-canvas" data-slot="check"><img alt="Check image" /></div>
+          </div>
+          <div class="image-slot">
+            <div class="slot-label">Invoice</div>
+            <div class="image-canvas" data-slot="invoice"><img alt="Invoice image" /></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right: editable form -->
+      <aside class="form-pane">
+        <h2>Transaction</h2>
+        <p id="txn-id" class="txn-id"></p>
+        <form id="txn-form" class="txn-form">
+          <label>Vendor / Payee
+            <input type="text" name="vendor_payee" />
+          </label>
+          <label>Check #
+            <input type="text" name="check_number" />
+          </label>
+          <label>Date
+            <input type="date" name="transaction_date" />
+          </label>
+          <label>Amount ($)
+            <input type="number" name="amount" step="0.01" />
+          </label>
+          <label>Memo
+            <input type="text" name="memo" />
+          </label>
+          <label>Chart of Accounts / Category
+            <select name="category_code" id="category-select"></select>
+          </label>
+          <label>Flag reason
+            <input type="text" name="flag_reason" placeholder="Why needs review?" />
+          </label>
+        </form>
+        <div class="txn-actions">
+          <button class="btn primary" id="approve-btn">Approve &amp; Next <span class="kbd">A</span></button>
+          <button class="btn warn" id="flag-btn">Flag / Needs Review <span class="kbd">F</span></button>
+          <button class="btn danger" id="unlink-btn">Unlink / Split <span class="kbd">U</span></button>
+        </div>
+        <p id="form-status" class="status"></p>
+      </aside>
+    </main>
+
+    <!-- Category rules modal -->
+    <dialog id="rules-dialog" class="modal">
+      <h2>Category Rules</h2>
+      <p class="hint">Map vendor/memo keywords to QuickBooks ledger accounts.</p>
+      <form id="rule-form" class="rule-form">
+        <select name="match_on" class="select">
+          <option value="vendor">Vendor</option>
+          <option value="memo">Memo</option>
+          <option value="both">Vendor or Memo</option>
+        </select>
+        <input type="text" name="keyword" placeholder="e.g. Nutrien" required />
+        <input type="text" name="account" placeholder="e.g. Fertilizer &amp; Lime" required />
+        <input type="number" name="priority" value="100" min="0" />
+        <button class="btn primary" type="submit">Add Rule</button>
+      </form>
+      <table class="rules-table">
+        <thead><tr><th>Match</th><th>Keyword</th><th>Account</th><th></th></tr></thead>
+        <tbody id="rules-body"></tbody>
+      </table>
+      <button class="btn ghost" id="rules-close">Close</button>
+    </dialog>
+
+    <!-- Audit log modal -->
+    <dialog id="audit-dialog" class="modal">
+      <h2>Audit Log</h2>
+      <ul id="audit-list" class="audit-list"></ul>
+      <button class="btn ghost" id="audit-close">Close</button>
+    </dialog>
+
+    <!-- Batch categorize modal -->
+    <dialog id="batch-dialog" class="modal">
+      <h2>Batch Categorize</h2>
+      <p id="batch-count" class="hint"></p>
+      <label>Apply category
+        <select id="batch-category"></select>
+      </label>
+      <div class="modal-actions">
+        <button class="btn primary" id="batch-apply">Apply</button>
+        <button class="btn ghost" id="batch-close">Cancel</button>
+      </div>
+    </dialog>
+
+    <!-- Export modal -->
+    <dialog id="export-dialog" class="modal">
+      <h2>Export Accountant Package</h2>
+      <p class="hint">Generates .iif + .csv + images, saves to R2, records audit.</p>
+      <label>Range
+        <select id="export-range" class="select">
+          <option value="month">This Month</option>
+          <option value="quarter">Last Quarter</option>
+          <option value="ytd">Year to Date</option>
+        </select>
+      </label>
+      <div class="modal-actions">
+        <button class="btn amber" id="export-confirm">Generate &amp; Save</button>
+        <button class="btn ghost" id="export-close">Close</button>
+      </div>
+      <p id="export-status" class="status"></p>
+    </dialog>
+
+    <!-- Keyboard shortcut hint -->
+    <div class="kbd-hint">
+      <span><kbd>A</kbd> approve</span>
+      <span><kbd>F</kbd> flag</span>
+      <span><kbd>U</kbd> unlink</span>
+      <span><kbd>→</kbd> next</span>
+      <span><kbd>←</kbd> prev</span>
+      <span><kbd>R</kbd> rotate</span>
+    </div>
+  </div>
+
+  <script type="module" src="/accountant.js"></script>
+</body>
+</html>
