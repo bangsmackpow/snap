@@ -6,7 +6,10 @@ const state = {
 };
 
 async function api(url, opts) {
-  const res = await fetch(url, opts);
+  const res = await fetch(url, {
+    ...opts,
+    credentials: "include",
+  });
   let body = null;
   try { body = await res.json(); } catch {}
   if (!res.ok) {
