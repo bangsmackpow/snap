@@ -7,6 +7,7 @@ import type { Env, AppEnv } from "../env";
 import { bytesToHex, constantTimeEqual, fromBase64Url, toBase64Url } from "./encoding";
 
 export const SESSION_COOKIE = "snap_session";
+export const ADMIN_COOKIE = "snap_admin";
 export const MAGIC_TOKEN_PREFIX = "snap.magic.";
 
 export type Db = DrizzleD1Database<typeof schema>;
@@ -69,25 +70,30 @@ export async function verifySessionToken(
   return session;
 }
 
-export function getTokenFromRequest(request: Request): string | null {
+export function getTokenFromRequest(request: Request, cookieName: string = SESSION_COOKIE): string | null {
   const cookie = request.headers.get("Cookie") ?? "";
   for (const part of cookie.split(";")) {
     const [name, ...rest] = part.trim().split("=");
-    if (name === SESSION_COOKIE) return rest.join("=");
+    if (name === cookieName) return rest.join("=");
   }
   return null;
 }
 
 export async function getSessionFromRequest(
   env: Env,
-  request: Request
+  request: Request,
+  cookieName: string = SESSION_COOKIE
 ): Promise<schema.SessionRow | null> {
-  return verifySessionToken(env, getTokenFromRequest(request));
+  return verifySessionToken(env, getTokenFromRequest(request, cookieName));
 }
 
-export function sessionCookie(token: string, opts: { secure: boolean; maxAgeSec: number }): string {
+export function sessionCookie(
+  token: string,
+  opts: { secure: boolean; maxAgeSec: number; cookieName?: string }
+): string {
+  const name = opts.cookieName ?? SESSION_COOKIE;
   const parts = [
-    `${SESSION_COOKIE}=${token}`,
+    `${name}=${token}`,
     "Path=/",
     "HttpOnly",
     "SameSite=Lax",
@@ -97,8 +103,9 @@ export function sessionCookie(token: string, opts: { secure: boolean; maxAgeSec:
   return parts.join("; ");
 }
 
-export function clearSessionCookie(opts: { secure: boolean }): string {
-  const parts = [`${SESSION_COOKIE}=`, "Path=/", "HttpOnly", "SameSite=Lax", "Max-Age=0"];
+export function clearSessionCookie(opts: { secure: boolean; cookieName?: string }): string {
+  const name = opts.cookieName ?? SESSION_COOKIE;
+  const parts = [`${name}=`, "Path=/", "HttpOnly", "SameSite=Lax", "Max-Age=0"];
   if (opts.secure) parts.push("Secure");
   return parts.join("; ");
 }

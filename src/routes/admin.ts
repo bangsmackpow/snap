@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { desc, eq } from "drizzle-orm";
 import type { AppEnv } from "../env";
 import { adminUsers, enrollCodes, sessions } from "../db/schema";
-import { getDb, sessionCookie, clearSessionCookie } from "../lib/auth";
+import { getDb, sessionCookie, clearSessionCookie, ADMIN_COOKIE } from "../lib/auth";
 import {
   bootstrapAdmin,
   generateEnrollCode,
@@ -49,13 +49,13 @@ admin.post("/login", async (c) => {
     .where(eq(adminUsers.id, user.id));
 
   const secure = c.env.COOKIE_SECURE !== "false";
-  c.header("Set-Cookie", sessionCookie(token, { secure, maxAgeSec: 12 * 60 * 60 }));
+  c.header("Set-Cookie", sessionCookie(token, { secure, maxAgeSec: 12 * 60 * 60, cookieName: ADMIN_COOKIE }));
   return c.json({ authenticated: true, role: "admin", username: user.username });
 });
 
 admin.post("/logout", (c) => {
   const secure = c.env.COOKIE_SECURE !== "false";
-  c.header("Set-Cookie", clearSessionCookie({ secure }));
+  c.header("Set-Cookie", clearSessionCookie({ secure, cookieName: ADMIN_COOKIE }));
   return c.json({ authenticated: false });
 });
 

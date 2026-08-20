@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { createMiddleware } from "hono/factory";
 import { adminUsers, enrollCodes } from "../db/schema";
 import type { Env, AppEnv } from "../env";
-import { getDb, getSessionFromRequest, hashToken, issueSessionToken, type Db } from "./auth";
+import { ADMIN_COOKIE, getDb, getSessionFromRequest, hashToken, issueSessionToken, type Db } from "./auth";
 import { bytesToHex, toBase64Url } from "./encoding";
 
 // ---- password hashing (PBKDF2 via Web Crypto, no external deps) -------------
@@ -59,7 +59,7 @@ export async function issueAdminSession(env: Env, adminId: string): Promise<stri
 }
 
 export const requireAdmin = createMiddleware<AppEnv>(async (c, next) => {
-  const session = await getSessionFromRequest(c.env, c.req.raw);
+  const session = await getSessionFromRequest(c.env, c.req.raw, ADMIN_COOKIE);
   if (!session) return c.json({ error: "unauthorized" }, 401);
   if (session.user_role !== "admin") return c.json({ error: "forbidden" }, 403);
   c.set("session", session);
