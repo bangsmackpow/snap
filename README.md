@@ -118,11 +118,28 @@ src/
 
 ## Deployment
 
-1. Create the D1 database and R2 bucket in the Cloudflare dashboard (or `wrangler d1 create`).
+The project deploys as a single Cloudflare Worker (`snap`) at
+`https://snap.curtislamasters.workers.dev`.
+
+### One-time setup
+
+1. Create the D1 database and R2 bucket (or `wrangler d1 create` / `wrangler r2 bucket create`).
 2. Set the real `database_id` in `wrangler.jsonc`.
-3. `wrangler secret put` for each of the secrets.
+3. `wrangler secret put` for each of the secrets (`AUTH_SECRET`, `DATA_KEY_SECRET`,
+   `VISION_API_KEY`, `COOKIE_SECURE`, `ALLOWED_ORIGINS`).
 4. `npm run db:migrate:remote` to apply migrations.
 5. `npm run deploy`.
+
+### Auto-deploy (Workers Builds)
+
+The `snap` Worker is connected to this GitHub repo via **Workers Builds**. Pushing to
+the `main` branch automatically installs dependencies, runs `npm run deploy`
+(`wrangler deploy`), and promotes the new version to Active. No manual deploy needed
+for routine changes — just push to `main`.
+
+- Trigger branch: `main`
+- Deploy command: `npm run deploy`
+- Build history: Cloudflare dashboard → **Workers & Pages** → `snap` → **Deployments**
 
 ## Repository notes
 
