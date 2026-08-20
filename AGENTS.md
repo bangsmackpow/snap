@@ -116,6 +116,12 @@ stores `r2_key`, not a public URL). If you add a download route, route it throug
 - Desktop admin page at `/admin` (clean-URL alias of `/admin.html`). Auth is a
   username/password login (`POST /api/admin/login`) issuing an `admin` session
   cookie (role `admin`). All other `/api/admin/*` routes are behind `requireAdmin`.
+- **Admin sessions use a dedicated `snap_admin` cookie** (`ADMIN_COOKIE` in
+  `src/lib/auth.ts`) — NOT the shared `snap_session` used by farmer/accountant. This
+  keeps the three roles from clobbering each other. `requireAdmin` and admin
+  `/me`/logout read/write `snap_admin`; admin login sets it, admin logout clears it.
+  `sessionCookie`/`clearSessionCookie`/`getSessionFromRequest` accept a `cookieName`
+  arg (default `SESSION_COOKIE`).
 - First admin is bootstrapped from `ADMIN_BOOTSTRAP_USERNAME`/`ADMIN_BOOTSTRAP_PASSWORD`
   secrets (only when no matching admin exists). Set via `wrangler secret put`.
 - Admin passwords are stored as salted **PBKDF2** hashes (Web Crypto) in
@@ -151,6 +157,9 @@ stores `r2_key`, not a public URL). If you add a download route, route it throug
   then `POST /api/transactions/pair`. No typing required.
 - The Export dialog (`<dialog>`) in the header: "Download Accountant Package" builds
   `/api/exports/bundle` from a radio-selected range and triggers a client-side download.
+- Gotcha: toggling screens via the `hidden` attribute only works if no CSS `display`
+  rule overrides it. `admin.css` (and others) keep `[hidden] { display: none !important }`
+  so login/dashboard toggles always work even when elements set `display: flex`.
 
 ## Local dev quirks
 

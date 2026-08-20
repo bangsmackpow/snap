@@ -29,6 +29,8 @@ QuickBooks-ready export — all without typing a single line.
 
 ### Admin Area (`/admin`)
 - Username/password login with PBKDF2-hashed accounts in D1
+- Dedicated `snap_admin` session cookie, so admin sessions never clash with the
+  farmer/accountant `snap_session` cookie
 - Manage admin users (create, reset password, disable, delete)
 - Generate and revoke per-user farmer enrollment codes
 - View and force-logout active sessions
@@ -106,12 +108,15 @@ src/
 ### Security model
 
 - **Sessions:** random 32-byte tokens, stored hashed (SHA-256) in D1, delivered as
-  HttpOnly `snap_session` cookies.
+  HttpOnly cookies. Farmer/accountant sessions use `snap_session`; **admin sessions
+  use a separate `snap_admin` cookie** so the three roles never clobber each other.
 - **Magic links:** `snap.magic.<payload>.<hmac>` signed with `AUTH_SECRET`, recorded in
   `magic_links` for single-use, exchanged for a persistent accountant session.
 - **R2 encryption:** every document image is encrypted with AES-GCM using a fresh data
   key sealed under a master key derived from `DATA_KEY_SECRET`. R2 objects are
   `docs/<uuid>.enc` and are decrypted only on `GET /api/documents/:id/preview`.
+- **Admin passwords:** stored as salted PBKDF2 hashes (Web Crypto) in `admin_users`,
+  never plaintext; admin sessions are stored in `sessions` with `user_role = 'admin'`.
 
 ### Data model
 
