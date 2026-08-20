@@ -13,7 +13,7 @@
     {
       "binding": "DB",
       "database_name": "snap-db",
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "5ba9917c-b596-48c8-9ad2-28194dc6c5a6",
       "migrations_dir": "drizzle"
     }
   ],
