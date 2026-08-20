@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#1a5c38" />
+  <title>Snap Ledger — Admin</title>
+  <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/admin.css" />
+</head>
+<body>
+  <!-- Login screen -->
+  <div id="login-screen" class="login-screen" hidden>
+    <div class="login-card">
+      <div class="login-brand">
+        <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/>
+          <circle cx="12" cy="13" r="3"/>
+        </svg>
+        <h1>Snap Ledger</h1>
+        <p class="login-sub">Administrator sign in</p>
+      </div>
+      <form id="login-form" class="login-form">
+        <label>
+          Username
+          <input type="text" name="username" autocomplete="username" required autofocus />
+        </label>
+        <label>
+          Password
+          <input type="password" name="password" autocomplete="current-password" required />
+        </label>
+        <button type="submit" class="btn primary btn-block" id="login-btn">Sign in</button>
+        <p id="login-error" class="form-error" role="alert"></p>
+      </form>
+      <a class="back-link" href="/">← Back to app</a>
+    </div>
+  </div>
+
+  <!-- Admin dashboard -->
+  <div id="dashboard" hidden>
+    <header class="topbar">
+      <div class="topbar-title">
+        <svg class="brand-icon sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/>
+          <circle cx="12" cy="13" r="3"/>
+        </svg>
+        <span>Snap Ledger — Admin</span>
+      </div>
+      <div class="topbar-actions">
+        <span id="admin-user" class="admin-user"></span>
+        <button id="logout-btn" class="btn ghost">Sign out</button>
+      </div>
+    </header>
+
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-tab="users" role="tab">Users</button>
+      <button class="tab" data-tab="codes" role="tab">Enrollment Codes</button>
+      <button class="tab" data-tab="sessions" role="tab">Active Sessions</button>
+    </nav>
+
+    <main class="admin-main">
+      <!-- Users tab -->
+      <section id="tab-users" class="tab-panel active">
+        <div class="panel-head">
+          <h2>Admin Users</h2>
+          <button class="btn primary" id="add-user-btn">+ Add user</button>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr><th>Username</th><th>Status</th><th>Last login</th><th>Created</th><th></th></tr>
+            </thead>
+            <tbody id="users-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Enrollment codes tab -->
+      <section id="tab-codes" class="tab-panel">
+        <div class="panel-head">
+          <h2>Enrollment Codes</h2>
+          <button class="btn primary" id="add-code-btn">+ Generate code</button>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr><th>Label</th><th>Uses</th><th>Expires</th><th>Status</th><th></th></tr>
+            </thead>
+            <tbody id="codes-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Sessions tab -->
+      <section id="tab-sessions" class="tab-panel">
+        <div class="panel-head">
+          <h2>Active Sessions</h2>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr><th>Role</th><th>Created</th><th>Expires</th><th></th></tr>
+            </thead>
+            <tbody id="sessions-body"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Add user modal -->
+  <dialog id="user-dialog" class="modal">
+    <h2 id="user-dialog-title">Add Admin User</h2>
+    <form id="user-form" class="modal-form">
+      <label>Username
+        <input type="text" name="username" required minlength="3" />
+      </label>
+      <label>Password
+        <input type="password" name="password" required minlength="8" autocomplete="new-password" />
+      </label>
+      <div class="modal-actions">
+        <button type="submit" class="btn primary">Save</button>
+        <button type="button" class="btn ghost" data-close>Cancel</button>
+      </div>
+      <p id="user-form-error" class="form-error"></p>
+    </form>
+  </dialog>
+
+  <!-- Generate code modal -->
+  <dialog id="code-dialog" class="modal">
+    <h2>Generate Enrollment Code</h2>
+    <form id="code-form" class="modal-form">
+      <label>Label (e.g. "John's phone")
+        <input type="text" name="label" maxlength="120" />
+      </label>
+      <label>Max uses (blank = unlimited)
+        <input type="number" name="max_uses" min="1" />
+      </label>
+      <label>Expires (blank = never)
+        <input type="datetime-local" name="expires_at" />
+      </label>
+      <div class="modal-actions">
+        <button type="submit" class="btn primary">Generate</button>
+        <button type="button" class="btn ghost" data-close>Cancel</button>
+      </div>
+      <p id="code-form-error" class="form-error"></p>
+    </form>
+  </dialog>
+
+  <!-- Reveal code modal -->
+  <dialog id="reveal-dialog" class="modal">
+    <h2>Enrollment Code</h2>
+    <p class="hint">Share this code with the farmer. It is shown only once.</p>
+    <div class="code-reveal">
+      <code id="reveal-code"></code>
+      <button class="btn ghost" id="copy-code-btn">Copy</button>
+    </div>
+    <div class="modal-actions">
+      <button class="btn primary" data-close>Done</button>
+    </div>
+  </dialog>
+
+  <script type="module" src="/admin.js"></script>
+</body>
+</html>

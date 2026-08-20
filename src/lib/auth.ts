@@ -38,14 +38,15 @@ export async function hmacSign(secret: string, data: string): Promise<string> {
 
 export async function issueSessionToken(
   env: Env,
-  opts: { role: schema.UserRole; ttlMs: number }
+  opts: { role: schema.UserRole; ttlMs: number; id?: string; userId?: string }
 ): Promise<string> {
   const raw = crypto.getRandomValues(new Uint8Array(32));
   const token = toBase64Url(raw);
   const db = getDb(env);
   await db.insert(schema.sessions).values({
-    id: crypto.randomUUID(),
+    id: opts.id ?? crypto.randomUUID(),
     user_role: opts.role,
+    user_id: opts.userId ?? null,
     token_hash: await hashToken(token),
     expires_at: Date.now() + opts.ttlMs,
   });

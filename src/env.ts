@@ -11,6 +11,8 @@ export type Env = {
   AUTH_TOKEN_TTL_DAYS?: string;
   MAGIC_LINK_TTL_MINUTES?: string;
   ENROLL_KEY?: string;
+  ADMIN_BOOTSTRAP_USERNAME?: string;
+  ADMIN_BOOTSTRAP_PASSWORD?: string;
   COOKIE_SECURE?: string;
   ALLOWED_ORIGINS?: string;
 };

@@ -8,16 +8,23 @@
   <link rel="icon" type="image/svg+xml" href="/icon.svg" />
   <link rel="apple-touch-icon" href="/icon.svg" />
   <title>Snap Ledger</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
   <header>
     <div class="brand">
-      <span class="brand-mark" aria-hidden="true">🧾</span>
+      <svg class="brand-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/>
+        <circle cx="12" cy="13" r="3"/>
+      </svg>
       <h1>Snap Ledger</h1>
     </div>
     <div class="header-actions">
       <button id="export-open-btn" class="header-btn" type="button" hidden>Export</button>
+      <a id="admin-link" class="header-btn" href="/admin">Admin</a>
       <span id="auth-badge" class="badge" hidden></span>
     </div>
   </header>

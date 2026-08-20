@@ -14,6 +14,7 @@ import {
   sessionCookie,
 } from "../lib/auth";
 import { requireFarmer, getSessionFromRequest } from "../lib/auth";
+import { consumeEnrollCode } from "../lib/admin";
 import { decryptDocument, encryptDocument } from "../lib/crypto";
 import { runExtraction, isUsableDocType } from "../lib/vision";
 import { autoPair, pairTwoDocs } from "../lib/pairing";
@@ -36,9 +37,17 @@ api.post("/auth/enroll", async (c) => {
   const parsed = enrollRequestSchema.safeParse(body);
   if (!parsed.success) return c.json({ error: "invalid_body" }, 400);
 
-  const requiredKey = c.env.ENROLL_KEY;
-  if (requiredKey && parsed.data.enroll_key !== requiredKey) {
-    return c.json({ error: "bad_enroll_key" }, 401);
+  const code = parsed.data.enroll_key;
+
+  // Enrollment requires a valid code: either a per-user D1 enroll code or the
+  // legacy static ENROLL_KEY secret.
+  if (code) {
+    const ok = await consumeEnrollCode(c.env, code);
+    if (!ok && code !== c.env.ENROLL_KEY) {
+      return c.json({ error: "bad_enroll_key" }, 401);
+    }
+  } else {
+    return c.json({ error: "enroll_code_required" }, 401);
   }
 
   const ttlDays = Number(c.env.AUTH_TOKEN_TTL_DAYS ?? 365);

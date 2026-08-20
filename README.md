@@ -27,6 +27,13 @@ QuickBooks-ready export — all without typing a single line.
 - Keyboard-driven review: `A` approve & next, `F` flag, `U` unlink, `←/→` navigate
 - Magic-link auth with single-use tokens
 
+### Admin Area (`/admin`)
+- Username/password login with PBKDF2-hashed accounts in D1
+- Manage admin users (create, reset password, disable, delete)
+- Generate and revoke per-user farmer enrollment codes
+- View and force-logout active sessions
+- First admin bootstrapped from `ADMIN_BOOTSTRAP_USERNAME`/`ADMIN_BOOTSTRAP_PASSWORD`
+
 ### Export Engine
 - QuickBooks **IIF** (`CHECK` / `BILL` / `BILLPAY`)
 - Schedule F **CSV** with category inference

@@ -4,5 +4,8 @@ AUTH_SECRET=change-me-at-least-32-random-chars
 DATA_KEY_SECRET=change-me-at-least-32-random-chars
 VISION_API_KEY=
 ENROLL_KEY=
+# Bootstrap the first admin account (only used when no admin exists yet)
+ADMIN_BOOTSTRAP_USERNAME=
+ADMIN_BOOTSTRAP_PASSWORD=
 COOKIE_SECURE=false
 ALLOWED_ORIGINS=

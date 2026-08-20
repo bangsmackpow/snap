@@ -1,6 +1,6 @@
 import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
-export const userRoles = ["farmer", "accountant"] as const;
+export const userRoles = ["farmer", "accountant", "admin"] as const;
 export type UserRole = (typeof userRoles)[number];
 
 export const docTypes = ["check", "invoice", "receipt", "unknown"] as const;
@@ -18,6 +18,7 @@ export type AuditAction = (typeof auditActions)[number];
 export const sessions = sqliteTable("sessions", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   user_role: text("user_role", { enum: userRoles }).notNull(),
+  user_id: text("user_id"),
   token_hash: text("token_hash").notNull(),
   expires_at: integer("expires_at").notNull(),
   created_at: integer("created_at").notNull().$defaultFn(() => Date.now()),
@@ -127,8 +128,43 @@ export const magicLinks = sqliteTable(
   (t) => [index("magic_links_token_idx").on(t.token_hash)]
 );
 
+// Admin accounts. Passwords are stored as salted PBKDF2 hashes (never plaintext).
+export const adminUsers = sqliteTable(
+  "admin_users",
+  {
+    id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+    username: text("username").notNull().unique(),
+    password_hash: text("password_hash").notNull(),
+    salt: text("salt").notNull(),
+    active: integer("active").notNull().default(1),
+    last_login_at: integer("last_login_at"),
+    created_at: integer("created_at").notNull().$defaultFn(() => Date.now()),
+  },
+  (t) => [index("admin_users_username_idx").on(t.username)]
+);
+
+// Per-user enrollment codes for the farmer PWA. The code itself is stored
+// hashed (SHA-256); the plaintext is shown to the admin exactly once on create.
+export const enrollCodes = sqliteTable(
+  "enroll_codes",
+  {
+    id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+    code_hash: text("code_hash").notNull(),
+    label: text("label"),
+    created_by: text("created_by"),
+    expires_at: integer("expires_at"),
+    max_uses: integer("max_uses"),
+    used_count: integer("used_count").notNull().default(0),
+    active: integer("active").notNull().default(1),
+    created_at: integer("created_at").notNull().$defaultFn(() => Date.now()),
+  },
+  (t) => [index("enroll_codes_hash_idx").on(t.code_hash)]
+);
+
 export type SessionRow = typeof sessions.$inferSelect;
 export type DocRow = typeof documents.$inferSelect;
 export type TxRow = typeof transactions.$inferSelect;
 export type CategoryRuleRow = typeof categoryRules.$inferSelect;
 export type AuditLogRow = typeof auditLog.$inferSelect;
+export type AdminUserRow = typeof adminUsers.$inferSelect;
+export type EnrollCodeRow = typeof enrollCodes.$inferSelect;

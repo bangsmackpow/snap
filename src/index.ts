@@ -5,6 +5,7 @@ import type { AppEnv } from "./env";
 import { requireSession } from "./lib/auth";
 import { apiRoutes } from "./routes/api";
 import { accountantRoutes } from "./routes/accountant";
+import { adminRoutes } from "./routes/admin";
 
 const app = new Hono<AppEnv>();
 
@@ -32,6 +33,7 @@ app.get("/healthz", requireSession, (c) =>
 
 app.route("/api", apiRoutes);
 app.route("/api/accountant", accountantRoutes);
+app.route("/api/admin", adminRoutes);
 
 // Static assets in public/ are served by Workers Static Assets before this
 // Worker runs (assets-first). Anything that reaches here is an API 404.
